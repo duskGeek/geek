@@ -11,6 +11,7 @@
         <module>geek-spark-sql</module>
         <module>geek-spark-streaming</module>
         <module>geek-utils</module>
+        <module>geek-flink</module>
     </modules>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -23,6 +24,7 @@
         <scala.tools.version>2.12</scala.tools.version>
         <geek-utils.version>1.0-SNAPSHOT</geek-utils.version>
         <hbase.version>1.2.0</hbase.version>
+        <flink.version>1.10.1</flink.version>
     </properties>
     <repositories>
         <repository>
