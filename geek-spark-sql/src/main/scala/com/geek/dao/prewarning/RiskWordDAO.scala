@@ -13,4 +13,7 @@ class RiskWordDAO extends BaseDAO  {
     db.batchInsert(sql,list.toSeq)
   }
 
+
+
+
 }

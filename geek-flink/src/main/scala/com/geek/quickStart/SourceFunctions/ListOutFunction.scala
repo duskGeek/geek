@@ -1,5 +1,6 @@
 package com.geek.quickStart.SourceFunctions
 
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.source.{RichParallelSourceFunction, SourceFunction}
 
 import scala.util.Random
@@ -11,6 +12,11 @@ class ListOutFunction extends RichParallelSourceFunction[Access] {
   val domains=Array("www.baidu.com","www.taobao.com","www.alibaba.com")
 
   val random= new Random()
+
+  override def open(parameters: Configuration): Unit = {
+    super.open(parameters)
+    println("-------------invok-----------------")
+  }
 
   override def run(sourceContext: SourceFunction.SourceContext[Access]): Unit = {
     while (running){

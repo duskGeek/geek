@@ -35,5 +35,11 @@
             <artifactId>flink-clients_${scala.tools.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.geek</groupId>
+            <artifactId>geek-utils</artifactId>
+            <version>${geek-utils.version}</version>
+        </dependency>
     </dependencies>
 </project>
