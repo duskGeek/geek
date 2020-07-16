@@ -26,4 +26,11 @@ object DBOperations extends Serializable {
         sql.batchByName(params: _*).apply()
       }
   }
+
+  def queryAll[A](sql:SQL[Nothing, NoExtractor],f: WrappedResultSet => A) ={
+    DB readOnly { implicit session=>
+      sql.map(f).list().apply()
+    }
+  }
+
 }
