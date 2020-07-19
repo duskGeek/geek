@@ -12,6 +12,41 @@ object MysqlSourceApp {
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
+    //mysqlFunction(env)
+    connectFunction(env)
+
+    env.execute(this.getClass.getSimpleName)
+
+  }
+
+  def connectFunction(env:StreamExecutionEnvironment): Unit ={
+    val riskWord=env.addSource[RiskWord](new MysqlFunction()).
+      keyBy("word").
+      timeWindow(Time.seconds(5)).
+      sum("countNum")
+
+    val splitWordStream=riskWord.split(x=>{
+      if(x.word.contains("Exception")){
+        List("error")
+      }else{
+        List("info")
+      }
+    })
+
+    val outputTag = OutputTag[String]("side-output")
+
+    val infoStream=splitWordStream.select("info")
+    val errorStream=splitWordStream.select("error")
+
+    infoStream.map(x=>{(x.word,x.countNum) }).
+      connect(errorStream).
+      map(x=>{(x._1,x._2,"info")}
+        ,y=>{(y.word,y.countNum,"error")}).print()
+
+  }
+
+
+  def mysqlFunction(env:StreamExecutionEnvironment): Unit ={
     val riskWord=env.addSource[RiskWord](new MysqlFunction()).
       keyBy("word").
       timeWindow(Time.seconds(5)).
@@ -31,9 +66,6 @@ object MysqlSourceApp {
 
     splitWordStream.select("info").print("-----------------")
     splitWordStream.select("error").print("~~~~~~~")
-
-    env.execute(this.getClass.getSimpleName)
-
   }
 
 }
