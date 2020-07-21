@@ -22,7 +22,6 @@ object CheckPointApp {
 
   }
 
-
   def easyCkeckPoint(env:StreamExecutionEnvironment): Unit ={
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(
       3, // 尝试重启的次数
@@ -36,14 +35,11 @@ object CheckPointApp {
     }).print()
   }
 
-
   def keyedStreamCkeckPoint(env:StreamExecutionEnvironment): Unit ={
     env.setRestartStrategy(RestartStrategies.fixedDelayRestart(
       3, // 尝试重启的次数
       Time.of(10, TimeUnit.SECONDS) // 延时
     ))
-
-    import com.geek.quickStart.WindowAverageMapState
 
     env.socketTextStream("yqdata000",44444).map(x=>{
       if(x=="yq")
@@ -54,7 +50,5 @@ object CheckPointApp {
       (words(0).toLong,words(1))
     }).keyBy(0).flatMap(new WindowAverageMapState2).print()
   }
-
-
 
 }
