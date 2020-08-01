@@ -69,7 +69,6 @@ object KeyedStateApp {
 
 
 class WindowAverageMapState2 extends RichFlatMapFunction[(Long,String),(Long,String,Long)]{
-
   var sum:MapState[String,Long] = _
 
   override def open(parameters: Configuration): Unit = {
@@ -92,6 +91,7 @@ class WindowAverageMapState2 extends RichFlatMapFunction[(Long,String),(Long,Str
 
     out.collect(value._1,value._2,currState)
   }
+
 }
 
 class WindowAverageMapState extends RichFlatMapFunction[(Long,Long),(Long,Long)]{

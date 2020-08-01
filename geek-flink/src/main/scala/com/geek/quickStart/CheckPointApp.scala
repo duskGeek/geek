@@ -7,6 +7,7 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.contrib.streaming.state.RocksDBStateBackend
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.{StreamExecutionEnvironment, _}
@@ -23,8 +24,8 @@ object CheckPointApp {
     config.enableExternalizedCheckpoints(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
 
 
-    env.setStateBackend(new FsStateBackend("hdfs://yqdata000:8020/test/ck"))
-
+    //env.setStateBackend(new FsStateBackend("hdfs://yqdata000:8020/test/ck"))
+    env.setStateBackend(new RocksDBStateBackend("hdfs://yqdata000:8020/test/ck"))
     //easyCkeckPoint(env)
 
     keyedStreamCkeckPoint(env)
