@@ -25,6 +25,7 @@ object CheckPointApp {
 
 
     //env.setStateBackend(new FsStateBackend("hdfs://yqdata000:8020/test/ck"))
+    //env.setStateBackend(new FsStateBackend("file:///./data"))
     env.setStateBackend(new RocksDBStateBackend("hdfs://yqdata000:8020/test/ck"))
     //easyCkeckPoint(env)
 

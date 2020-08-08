@@ -11,7 +11,7 @@ import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrderness
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.scala.function.ProcessWindowFunction
-import org.apache.flink.streaming.api.windowing.assigners.SlidingEventTimeWindows
+import org.apache.flink.streaming.api.windowing.assigners.{SlidingEventTimeWindows, TumblingEventTimeWindows}
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.util.Collector
@@ -38,7 +38,10 @@ object WaterMark01App {
     }).map(x=>{
       (x(1),x(2).toInt)
     }).keyBy(0).
-      window(SlidingEventTimeWindows.of(Time.seconds(6),Time.seconds(2))).
+      window(
+        SlidingEventTimeWindows.of(Time.seconds(6),Time.seconds(2))
+        //TumblingEventTimeWindows.of(Time.seconds(5))
+        ).
       reduce(new ReduceFunction[(String,Int)] {
         override def reduce(value1: (String, Int), value2: (String, Int)): (String, Int) = {
           (value1._1,value2._2+value1._2)
