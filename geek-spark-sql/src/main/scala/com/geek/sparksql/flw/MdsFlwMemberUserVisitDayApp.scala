@@ -25,9 +25,6 @@ object MdsFlwMemberUserVisitDayApp extends AppLogging {
 
 
     val flwDf = spark.read.format("jdbc").
-      option("user", "mocard_rw").
-      option("password", "wsxQASW!").
-      option("url", "jdbc:mysql://172.23.0.39:4000/mocard_flw?useUnicode=true&characterEncoding=utf-8&useSSL=false").
       option("driver", "com.mysql.jdbc.Driver").
       option("dbtable", " (SELECT time_local_date ,open_id FROM mocard_flw.rt_member_miniapp_flw_detail " +
         s"WHERE date(time_local_date)='$dt' ) flw ").load()
@@ -56,7 +53,7 @@ object MdsFlwMemberUserVisitDayApp extends AppLogging {
     try {
       conn = MysqlConnect.getConnection()
       conn.setAutoCommit(false)
-      val sql = "REPLACE INTO etl_mocard.mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);"
+      val sql = "REPLACE INTO mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);"
       val pstm = conn.prepareStatement(sql)
       list.foreach(userVisit => {
         pstm.setDate(1, userVisit.getAs("time_local_date"))
@@ -78,7 +75,7 @@ object MdsFlwMemberUserVisitDayApp extends AppLogging {
     try {
       conn = MysqlConnect.getConnectionNorbi()
       conn.setAutoCommit(false)
-      val sql = "REPLACE INTO member.mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);"
+      val sql = "REPLACE INTO mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);"
       val pstm = conn.prepareStatement(sql)
       list.foreach(userVisit => {
         pstm.setDate(1, userVisit.getAs("time_local_date"))

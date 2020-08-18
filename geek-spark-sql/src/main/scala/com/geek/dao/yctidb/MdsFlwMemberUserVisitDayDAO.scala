@@ -9,7 +9,7 @@ class MdsFlwMemberUserVisitDayDAO  {
   val db=DBOperations
 
   def bacthInsert(list:ListBuffer[Seq[Any]]): Unit ={
-    val sql="REPLACE INTO member.mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);";
+    val sql="REPLACE INTO mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);";
     db.batchInsert(sql,list)
   }
 

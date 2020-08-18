@@ -28,9 +28,7 @@ object MysqlConnect {
 
   def getConnectionNorbi() : Connection = {
     Class.forName(this.driver)
-    val url = "jdbc:mysql://mysqlnorbi.service.ycidcm5:3306/member?useUnicode=true&characterEncoding=utf-8&useSSL=false"
-    val username = "member_rw"
-    val password = "w@YL1E7@Y6dn0ugA"
+
     DriverManager.getConnection(url, username, password)
   }
 
