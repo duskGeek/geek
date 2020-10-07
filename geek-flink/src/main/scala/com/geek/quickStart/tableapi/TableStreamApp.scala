@@ -8,7 +8,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.scala.StreamTableEnvironment
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.table.api.{Slide, Tumble}
+import org.apache.flink.table.api.{EnvironmentSettings, Slide, Tumble}
 import org.apache.flink.types.Row
 import org.apache.flink.table.api.scala._
 import org.apache.flink.table.functions.{FunctionContext, ScalarFunction, TableFunction}
@@ -24,7 +24,8 @@ object TableStreamApp {
     //udfGetIpStream(env)
     //udtfExplodStream(env)
     //tumblWindow(env)
-    slideWindow(env)
+    //slideWindow(env)
+    overWindowFun(env)
     env.execute(this.getClass.getSimpleName)
   }
 
@@ -176,7 +177,35 @@ object TableStreamApp {
   }
 
 
+  def overWindowFun(env:StreamExecutionEnvironment): Unit ={
 
+    val envSetting=EnvironmentSettings.newInstance().useBlinkPlanner().inStreamingMode().build()
+
+    env.setStreamTimeCharacteristic(TimeCharacteristic.EventTime)
+    env.setParallelism(1)
+
+    val dataStream = env.socketTextStream("yqdata000", 44444).filter(_!=null).map(x => {
+      val array = x.split(",")
+      Access2(array(0), array(1).toLong, array(2).toInt, array(3))
+    }).assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor[Access2](Time.seconds(0)) {
+      override def extractTimestamp(t: Access2): Long = {
+        t.time
+      }
+    })
+    val tableEnv = StreamTableEnvironment.create(env,envSetting)
+    tableEnv.createTemporaryView("access2", dataStream, 'domain,'time, 'traffic, 'ip,'proctime.proctime)
+
+    val table=tableEnv.sqlQuery(
+      """
+        |SELECT
+        |domain,`time`,traffic,ip,
+        |ROW_NUMBER() OVER (PARTITION BY domain,ip ORDER BY proctime ASC ) AS row_num
+        |FROM access2
+      """.stripMargin)
+
+    table.printSchema()
+    tableEnv.toRetractStream[Row](table)
+  }
 
 
 }
