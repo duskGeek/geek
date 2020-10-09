@@ -2,8 +2,13 @@ package com.geek.utils.mysql
 import scalikejdbc.config._
 
 object MysqlConnectPool {
+
+  private var isInitYqdataPool=false
   def yqdataPoolSetup(): Unit ={
-    poolSetupAll("yqdata")
+    if(!isInitYqdataPool){
+      poolSetupAll("yqdata")
+      isInitYqdataPool=true
+    }
   }
 
   def yqdataPoolColse(): Unit ={
