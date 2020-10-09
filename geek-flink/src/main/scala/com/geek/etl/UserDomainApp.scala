@@ -1,6 +1,8 @@
 package com.geek.etl
 
+import java.io.{BufferedReader, InputStreamReader}
 import java.sql.{Connection, PreparedStatement}
+import java.util
 import java.util.concurrent.{Callable, ExecutorService, TimeUnit}
 
 import com.alibaba.druid.pool.DruidDataSource
@@ -15,6 +17,11 @@ import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.concurrent.Executors
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
+import org.apache.http.{HttpResponse, HttpStatus}
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.impl.nio.client.{CloseableHttpAsyncClient, HttpAsyncClients}
+import org.apache.http.util.EntityUtils
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -26,7 +33,8 @@ object UserDomainApp {
 
     //userDomainMapping(env,param)
     //ipConvertCity(env,param)
-    asyncUserDomainMapping(env,param)
+    //asyncUserDomainMapping(env,param)
+    asyncIpConvertCity(env,param)
     env.execute(this.getClass.getSimpleName)
   }
 
@@ -186,6 +194,67 @@ object UserDomainApp {
 
   }
 
+  def  asyncIpConvertCity(env:StreamExecutionEnvironment,param:ParameterTool): Unit ={
+
+    val port=param.getRequired("port")
+    val host=param.getRequired("host")
+
+    val ds=env.socketTextStream(host,port.toInt).map(x => {
+      x.split(',')
+    }).map(x=>{
+      try{
+        Access2(x(0),x(1),x(2).toInt,x(3),x(4),"","","")
+      }catch {
+        case e => e.printStackTrace();null
+      }
+    }).filter(_!=null)
+
+    val asyncDataStream=AsyncDataStream.unorderedWait(ds,new MyHttpAsyncFunction,1000,TimeUnit.MILLISECONDS,10)
+    asyncDataStream.print()
+  }
+
+  class MyHttpAsyncFunction extends RichAsyncFunction[Access2,Access2]{
+    implicit lazy val executor: ExecutionContext = ExecutionContext.fromExecutor(Executors.directExecutor())
+
+    var httpClient:CloseableHttpAsyncClient= _
+
+    override def open(parameters: Configuration): Unit = {
+      val config=RequestConfig.custom().setSocketTimeout(500).setConnectTimeout(500).build()
+      httpClient=HttpAsyncClients.custom().setMaxConnTotal(50).setDefaultRequestConfig(config).build()
+      httpClient.start()
+
+    }
+
+    override def close(): Unit = {
+      httpClient .close()
+    }
+
+    override def asyncInvoke(input: Access2, resultFuture: ResultFuture[Access2]): Unit = {
+      val loc=input.longitude+","+input.latitude
+
+      val httpGet=new HttpGet("https://restapi.amap.com/v3/geocode/regeo?key=0139ab9797c4367a167432510b8a62b6&location="+loc)
+      val future: util.concurrent.Future[HttpResponse] = httpClient.execute(httpGet,null)
+
+      val eventualString: Future[String] = Future {
+        val result = new StringBuffer
+        val response: HttpResponse = future.get()
+        if (response.getStatusLine().getStatusCode() == HttpStatus.SC_OK) {
+          result.append(EntityUtils.toString(response.getEntity, "UTF-8"))
+        }
+        result.toString
+      }
+      eventualString.onSuccess{
+        case e=> {
+          val reObj = JSON.parseObject(e)
+          val outAccess=input.copy(province = reObj.getJSONObject("regeocode").getJSONObject("addressComponent").getString("province"),
+            city =reObj.getJSONObject("regeocode").getJSONObject("addressComponent").getString("city"),
+            district =reObj.getJSONObject("regeocode").getJSONObject("addressComponent").getString("district"))
+          resultFuture.complete(Iterable(outAccess))
+        }
+      }
+
+    }
+  }
 
 }
 
