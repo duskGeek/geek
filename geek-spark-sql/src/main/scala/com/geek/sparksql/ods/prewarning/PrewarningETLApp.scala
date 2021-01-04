@@ -18,6 +18,8 @@ object PrewarningETLApp extends AppLogging{
     val df=spark.read.format("json").load(input)
     //df.printSchema()
 
+    val list=List()
+    list.par
 
     df.write.format("orc").mode(SaveMode.Overwrite).save(output)
     spark.stop()
