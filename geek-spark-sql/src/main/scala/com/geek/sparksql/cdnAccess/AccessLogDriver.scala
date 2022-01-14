@@ -20,7 +20,7 @@ object AccessLogDriver {
     val in=args(0)
     val out=args(1)
     val conf=new SparkConf().
-      set("spark.extraListeners","com.ycdw.sparksql.cdnAccess.MyListenter")
+      set("spark.extraListeners","com.DD.sparksql.cdnAccess.MyListenter")
 
     val sc=new SparkContext(conf)
 
