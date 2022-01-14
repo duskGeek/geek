@@ -11,7 +11,7 @@ object exportHiveDatabase {
       enableHiveSupport().
       getOrCreate()
 
-    val tableDs=spark.catalog.listTables("yc_ods");
+    val tableDs=spark.catalog.listTables("");
 
     val table=tableDs.rdd.map(x=>tableInfo(x.database,x.name,x.description)).collect()
 
@@ -23,7 +23,7 @@ object exportHiveDatabase {
     val flatRdd=spark.sparkContext.parallelize(infoRdd).flatMap(x=>x)
 
     flatRdd.toDS().map(_.toString).write.mode(SaveMode.Overwrite).
-      format("text").save("/yiche/dw/yc_dw_tmp/tableinfo/")
+      format("text").save("//dw//tableinfo/")
 
   }
 
