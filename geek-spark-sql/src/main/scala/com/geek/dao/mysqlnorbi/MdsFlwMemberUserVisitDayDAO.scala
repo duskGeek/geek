@@ -4,12 +4,12 @@ import com.geek.utils.mysql.DBOperations
 
 import scala.collection.mutable.ListBuffer
 
-class MdsFlwMemberUserVisitDayDAO  {
+class FlwUserVisitDayDAO  {
 
   val db=DBOperations
 
   def bacthInsert(list:ListBuffer[Seq[Any]]): Unit ={
-    val sql="REPLACE INTO mds_flw_member_user_visit_day(record_dt,open_id,pv) values(?,?,?);";
+    val sql="REPLACE INTO flw_user_visit_day(record_dt,open_id,pv) values(?,?,?);";
     db.batchInsert(sql,list)
   }
 }
