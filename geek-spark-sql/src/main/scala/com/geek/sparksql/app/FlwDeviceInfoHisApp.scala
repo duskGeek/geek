@@ -35,7 +35,7 @@ object FlwDeviceInfoHisApp {
 
   def readFormat(spark: SparkSession): Unit ={
     val options = Map("pushdown" -> "true",
-      "es.nodes" -> "192.168.87.162",
+      "es.nodes" -> "",
       "es.port" -> "9200")
     val df = spark.read.format("es").options(options)
       .load("flw_device_info_his_orc")
